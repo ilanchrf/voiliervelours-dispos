@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilités Groupe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .member-button {
+            padding: 10px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .member-button:hover {
+            background-color: #45a049;
+        }
+        .calendar-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        .day-cell {
+            width: 80px;
+            height: 80px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f9f9f9;
+        }
+        .selected {
+            background-color: #80e0a7;
+        }
+        .availability-container {
+            margin-top: 20px;
+        }
+        .availability {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Disponibilités du Groupe de Musique</h1>
+    <p>Cliquez sur votre nom pour entrer vos disponibilités</p>
+</div>
+
+<!-- Membres -->
+<button class="member-button" onclick="showCalendar('Ilan')">Ilan</button>
+<button class="member-button" onclick="showCalendar('Gauthier')">Gauthier</button>
+<button class="member-button" onclick="showCalendar('Noa')">Noa</button>
+<button class="member-button" onclick="showCalendar('Maude')">Maude</button>
+<button class="member-button" onclick="showCalendar('Adèle')">Adèle</button>
+
+<!-- Calendriers -->
+<div id="Ilan" class="calendar-container">
+    <h3>Disponibilités de Ilan</h3>
+    <div class="calendar" id="calendar-Ilan"></div>
+    <button onclick="saveAvailability('Ilan')">Enregistrer</button>
+</div>
+
+<div id="Gauthier" class="calendar-container">
+    <h3>Disponibilités de Gauthier</h3>
+    <div class="calendar" id="calendar-Gauthier"></div>
+    <button onclick="saveAvailability('Gauthier')">Enregistrer</button>
+</div>
+
+<div id="Noa" class="calendar-container">
+    <h3>Disponibilités de Noa</h3>
+    <div class="calendar" id="calendar-Noa"></div>
+    <button onclick="saveAvailability('Noa')">Enregistrer</button>
+</div>
+
+<div id="Maude" class="calendar-container">
+    <h3>Disponibilités de Maude</h3>
+    <div class="calendar" id="calendar-Maude"></div>
+    <button onclick="saveAvailability('Maude')">Enregistrer</button>
+</div>
+
+<div id="Adèle" class="calendar-container">
+    <h3>Disponibilités de Adèle</h3>
+    <div class="calendar" id="calendar-Adèle"></div>
+    <button onclick="saveAvailability('Adèle')">Enregistrer</button>
+</div>
+
+<!-- Résultats -->
+<div class="availability-container" id="availability-results">
+    <h3>Disponibilités communes</h3>
+    <div id="results"></div>
+</div>
+
+<script>
+    // Structure des disponibilités
+    const members = ['Ilan', 'Gauthier', 'Noa', 'Maude', 'Adèle'];
+    let availabilityData = {
+        'Ilan': [],
+        'Gauthier': [],
+        'Noa': [],
+        'Maude': [],
+        'Adèle': []
+    };
+
+    // Fonction pour afficher le calendrier
+    function showCalendar(member) {
+        // Masquer les autres calendriers
+        for (let m of members) {
+            document.getElementById(m).style.display = 'none';
+        }
+        // Afficher le calendrier du membre sélectionné
+        document.getElementById(member).style.display = 'block';
+        
+        // Remplir le calendrier pour le membre
+        const calendar = document.getElementById(`calendar-${member}`);
+        calendar.innerHTML = ''; // Réinitialiser le calendrier
+
+        // Jours de la semaine et heures disponibles
+        const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+        const times = ['08h', '09h', '10h', '11h', '12h', '13h', '14h', '15h', '16h', '17h', '18h', '19h', '20h', '21h', '22h', '23h'];
+
+        // Créer le calendrier
+        for (let i = 0; i < 7; i++) { // Jours de la semaine
+            const dayCell = document.createElement('div');
+            dayCell.classList.add('day-cell');
+            dayCell.innerText = days[i];
+            calendar.appendChild(dayCell);
+            
+            // Créer les plages horaires pour chaque jour
+            for (let j = 0; j < times.length; j++) {
+                const timeCell = document.createElement('div');
+                timeCell.classList.add('day-cell');
+                timeCell.innerText = times[j];
+                timeCell.onclick = () => toggleAvailability(member, days[i], times[j]);
+                dayCell.appendChild(timeCell);
+            }
+        }
+    }
+
+    // Fonction pour ajouter ou retirer une plage horaire
+    function toggleAvailability(member, day, time) {
+        const timeSlot = `${day} de ${time}`;
+        
+        const index = availabilityData[member].indexOf(timeSlot);
+        if (index === -1) {
+            availabilityData[member].push(timeSlot);
+        } else {
+            availabilityData[member].splice(index, 1);
+        }
+
+        alert(`${member} a sélectionné ou désélectionné: ${timeSlot}`);
+    }
+
+    // Fonction pour enregistrer les disponibilités
+    function saveAvailability(member) {
+        alert(`${member} a enregistré ses disponibilités`);
+        // Analyser les disponibilités communes
+        analyzeCommonAvailability();
+    }
+
+    // Fonction d'analyse des disponibilités communes
+    function analyzeCommonAvailability() {
+        let commonAvailability = [];
+
+        // Analyser toutes les disponibilités
+        const allAvailabilities = Object.values(availabilityData);
+
+        // Trouver les créneaux horaires communs
+        for (let timeSlot of allAvailabilities[0]) {
+            let common = true;
+            for (let i = 1; i < allAvailabilities.length; i++) {
+                if (!allAvailabilities[i].includes(timeSlot)) {
+                    common = false;
+                    break;
+                }
+            }
+            if (common) {
+                commonAvailability.push(timeSlot);
+            }
+        }
+
+        // Affichage des résultats
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+        if (commonAvailability.length > 0) {
+            commonAvailability.forEach(slot => {
+                const availabilityDiv = document.createElement('div');
+                availabilityDiv.classList.add('availability');
+                availabilityDiv.innerText = slot;
+                resultsDiv.appendChild(availabilityDiv);
+            });
+        } else {
+            resultsDiv.innerHTML = '<p>Aucune disponibilité commune trouvée.</p>';
+        }
+    }
+</script>
+
+</body>
+</html>
